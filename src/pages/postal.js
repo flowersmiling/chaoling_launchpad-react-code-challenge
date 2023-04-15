@@ -1,6 +1,13 @@
 import React, {useState, useMemo} from "react";
 import Typography from '@mui/material/Typography';
 import { AgGridReact } from 'ag-grid-react';
+import {
+  ColDef,
+  ColGroupDef,
+  GetDataPath,
+  Grid,
+  GridOptions,
+} from 'ag-grid-community';
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
@@ -8,7 +15,6 @@ import SearchIcon from '@mui/icons-material/Search';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import 'ag-grid-enterprise'
 
 const Postal = () => {
   const [gridApi, setGridApi] = useState(null)
@@ -41,7 +47,15 @@ const Postal = () => {
     fetch(`https://api.zippopotam.us/us/${params}`)
       .then((result) => result.json())
       .then((result) => {
-        setRowData(result)
+        if(result.length > 1){
+          setRowData(result)
+        }else{
+          // avoid the error: rowdata.map is not a function
+          // when binding single row on the AG-Grid with setRowData()
+          const newArray = new Array()
+          newArray.push(result)
+          setRowData(newArray)
+        }
       })
   }
 
