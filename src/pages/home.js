@@ -1,21 +1,26 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef } from "react";
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
+import Button from '@mui/material/Button';
 import { AgGridReact } from 'ag-grid-react';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 
 import ActionsRenderer from '../components/ActionsRenderer'
+import { any } from "prop-types";
 
 const Home = () => {
+  const gridRef = useRef<AgGridReact>(null)
   const [gridApi, setGridApi] = useState(null)
   const [columnApi, setColumnApi] = useState(null)
   const [rowData, setRowData] = useState(null)
   const [rowid, setRowid] = useState('')
+  const [showModal, setShowModal] = useState(false)
+
   const Columns = [
     { field: 'id', headerName: 'id' },
     { field: 'userId', headerName: 'userId' },
@@ -78,6 +83,14 @@ const Home = () => {
   const handleClick = () => {
     loadData(rowid)
   }
+
+  const addRow = useCallback(() => {
+    const emptyRow = {}
+
+    gridRef.current?.api.applyTransaction({
+      add: [emptyRow]
+    })
+  }, [])
 
   const onRowValueChanged = useCallback((event) => {
     const { data } = event
@@ -156,7 +169,7 @@ const Home = () => {
       </Typography>
       <Paper
         component="form"
-        sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 250 }}
+        sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 350 }}
       >
         <InputBase
           sx={{ ml: 1, flex: 1 }}
@@ -168,6 +181,7 @@ const Home = () => {
         <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={handleClick}>
           <SearchIcon />
         </IconButton>
+        <Button variant="outlined" onClick={addRow}>Add Row</Button>
       </Paper>
       <div
         id="myGrid"
