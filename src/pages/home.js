@@ -9,9 +9,17 @@ import { AgGridReact } from 'ag-grid-react';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import styled from 'styled-components';
 
 import ActionsRenderer from '../components/ActionsRenderer'
-import { any } from "prop-types";
+import { Modal } from "../components/Modal";
+
+const Container = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+`;
 
 const Home = () => {
   const gridRef = useRef<AgGridReact>(null)
@@ -84,44 +92,14 @@ const Home = () => {
     loadData(rowid)
   }
 
-  const addRow = useCallback(() => {
-    const emptyRow = {}
-
-    gridRef.current?.api.applyTransaction({
-      add: [emptyRow]
-    })
-  }, [])
+  const addRow = () => {
+    setShowModal(showModal => !showModal);
+  }
 
   const onRowValueChanged = useCallback((event) => {
     const { data } = event
-
-    if (data.id === undefined) {
-      fetch('https://jsonplaceholder.typicode.com/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          id: data.id,
-          title: data.title,
-          body: data.body,
-          userId: data.userId
-        })
-      })
-        .then((result) => result.json())
-        .then((result) => {
-          data.id = result.insertedId // avoid inserting repeatedly
-          if (result.insertedId) {
-            global?.window && window.confirm(`successfully add a new row`)
-          } else {
-            global?.window &&
-              window.confirm(
-                `Failed to add a new row, please check all of the columns have been filled out correctly`
-              )
-          }
-        })
-    } else {
-      fetch(`https://jsonplaceholder.typicode.com/posts/${data.id}`, {
+    
+    fetch(`https://jsonplaceholder.typicode.com/posts/${data.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -135,7 +113,8 @@ const Home = () => {
       })
         .then((result) => result.json())
         .then((result) => {
-          if (result.modifiedCount === 1) {
+          console.log(result)
+          if (result) {
             global?.window && window.confirm(`successfully update the row`)
           } else {
             global?.window &&
@@ -144,7 +123,6 @@ const Home = () => {
               )
           }
         })
-    }
   }, [])
 
   const methodFromParent = (cell) => {
@@ -183,9 +161,9 @@ const Home = () => {
         </IconButton>
         <Button variant="outlined" onClick={addRow}>Add Row</Button>
       </Paper>
-      <div
+      { !showModal ? (<div
         id="myGrid"
-        style={{ height: 800, width: '100%' }}
+        style={{ height: 1440, width: '100%' }}
         className="ag-theme-alpine"
       >
         <AgGridReact
@@ -198,7 +176,10 @@ const Home = () => {
           onRowValueChanged={onRowValueChanged}
           context={{ methodFromParent }} // Parent/Child Communication using context
         />
-      </div>
+      </div>) : null}
+      <Container>
+        <Modal showModal={showModal} setShowModal={setShowModal} />
+      </Container>
     </div>
     );
   };
