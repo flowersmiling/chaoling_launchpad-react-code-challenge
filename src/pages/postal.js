@@ -1,13 +1,7 @@
-import React, {useState, useMemo} from "react";
+import React, {useState, useMemo, useCallback} from "react";
 import Typography from '@mui/material/Typography';
 import { AgGridReact } from 'ag-grid-react';
-import {
-  ColDef,
-  ColGroupDef,
-  GetDataPath,
-  Grid,
-  GridOptions,
-} from 'ag-grid-community';
+    
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
@@ -21,24 +15,26 @@ const Postal = () => {
   const [columnApi, setColumnApi] = useState(null)
   const [postcode, setPostcode] = useState(10000)
   const [rowData, setRowData] = useState(null)
+  const [rowData1, setRowData1] = useState(null)
   const Columns = [
     { field: 'post code', headerName: 'post code' },
     { field: 'country', headerName: 'country' },
-    { field: 'country abbreviation', headerName: 'country abbreviation' },
-    { field: 'places', headerName: 'places' }
+    { field: 'country abbreviation', headerName: 'country abbreviation' }
+  ]
+  const Columns1 = [
+    { field: 'place name', headerName: 'place name'},
+    { field: 'longitude', headerName: 'longitude'},
+    { field: 'state', headerName: 'state'},
+    { field: 'state abbreviation', headerName: 'state abbreviation'},
+    { field: 'latitude', headerName: 'latitude'}
   ]
 
   const [columnDefs] = useState(Columns)
+  const [columnDefs1] = useState(Columns1)
   const defaultColDef = useMemo(
     () => ({
       flex: 1,
       minWidth: 60,
-      editable: true,
-      sortable: true,
-      resizable: true,
-      filter: true,
-      floatingFilter: true,
-      suppressKeyboardEvent: (params) => params.editing
     }),
     []
   )
@@ -55,6 +51,9 @@ const Postal = () => {
           const newArray = new Array()
           newArray.push(result)
           setRowData(newArray)
+
+          const newItems = result.places
+          setRowData1(newItems)
         }
       })
   }
@@ -96,13 +95,19 @@ const Postal = () => {
     </Paper>
       <div
         id="myGrid"
-        style={{ height: 800, width: '100%' }}
+        style={{ height: 140, width: '100%' }}
         className="ag-theme-alpine"
       >
         <AgGridReact
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           rowData={rowData}
+          onGridReady={onGridReady}
+        />
+        <AgGridReact
+          columnDefs={columnDefs1}
+          defaultColDef={defaultColDef}
+          rowData={rowData1}
           onGridReady={onGridReady}
         />
       </div>
